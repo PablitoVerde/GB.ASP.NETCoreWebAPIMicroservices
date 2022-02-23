@@ -17,7 +17,7 @@ d. Возможность прочитать список показателей
 namespace Lesson1.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -26,13 +26,15 @@ namespace Lesson1.Controllers
         };
 
         private readonly ValuesHolder _holder;
+        private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ValuesHolder _valuesHolder)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, ValuesHolder _valuesHolder)
         {
+            _logger = logger;
             _holder = _valuesHolder;
         }
 
-
+        //тестовый запрос
         [HttpPost("createTest")]
         public IEnumerable<WeatherForecast> Get()
         {
@@ -47,40 +49,60 @@ namespace Lesson1.Controllers
                     Summary = Summaries[rng.Next(Summaries.Length)]
 
                 };
-                _holder.AddValuesHolder(item);
+                _holder.AddValue(item);
             }
 
             return _holder.ToArray();
         }
 
+        /// <summary>
+        /// Запрос на создание записи о температуре в указанное время
+        /// </summary>
+        /// <param Дата="date"></param>
+        /// <param Температура в цельсиях="temperatureC"></param>
+        /// <param Описание="summary"></param>
+        /// <returns></returns>
         [HttpPost("create")]
-        public IActionResult Create([FromQuery] string input)
+        public IActionResult Create([FromBody] WeatherForecast weatherForecast)
         {
+           
+            _holder.AddValue(weatherForecast);
+            return Ok();
+        }
 
-            _holder.Add(input);
-            return Ok();
-        }
+        /// <summary>
+        /// Запрос на получение имеющихся записей о погоде за определенное время
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("read")]
-        public IActionResult Read()
+        public IActionResult Read([FromBody] DateTime startDate, DateTime endDate)
         {
-            return Ok(_holder.Get());
+            return Ok(_holder.ToArray().Select(x => x.Date <= endDate && x.Date >= startDate).ToList());
         }
+
+        /// <summary>
+        /// Запрос на изменение значения температуры в указанный день
+        /// </summary>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        /// <returns></returns>
         [HttpPut("update")]
-        public IActionResult Update([FromQuery] string stringsToUpdate,
-        [FromQuery] string newValue)
-        {           
-            for (int i = 0; i < _holder.Values.Count; i++)
-            {
-                if (holder.Values[i] == stringsToUpdate)
-                    holder.Values[i] = newValue;
-            }
-            return Ok();
-        }
-        [HttpDelete("delete")]
-        public IActionResult Delete([FromQuery] string stringsToDelete)
+        public IActionResult Update([FromQuery] string oldValue, [FromQuery] string newValue)
         {
-            holder.Values = holder.Values.Where(w => w !=
-            stringsToDelete).ToList();
+            _holder.UpdateValues(oldValue, newValue);
             return Ok();
         }
+
+        /// <summary>
+        /// Запрос на удаление данных за определенный день
+        /// </summary>
+        /// <param name="valueToDelete"></param>
+        /// <returns></returns>
+        [HttpDelete("delete")]
+        public IActionResult Delete([FromQuery] string valueToDelete)
+        {
+            _holder.DeleteValues(valueToDelete);
+            return Ok();
+        }
+    }
 }

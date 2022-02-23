@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Lesson1
@@ -8,26 +9,42 @@ namespace Lesson1
     /// </summary>
     public class ValuesHolder
     {
-        public List<WeatherForecast> valuesHolder;
+        public ConcurrentDictionary<string, WeatherForecast> valuesHolder;
+
         public ValuesHolder()
         {
-            valuesHolder = new List<WeatherForecast>();
-
+            valuesHolder = new ConcurrentDictionary<string, WeatherForecast>();
         }
 
-        public void AddValuesHolder(WeatherForecast value)
+        public void AddValue(WeatherForecast weatherForecast)
         {
-            valuesHolder.Add(value);
+            valuesHolder.TryAdd(weatherForecast.Date.ToString(), weatherForecast);
         }
 
         public WeatherForecast[] ToArray()
         {
-            return valuesHolder.ToArray();
+            WeatherForecast[] weatherForecasts = new WeatherForecast[valuesHolder.Count];
+
+            valuesHolder.Values.CopyTo(weatherForecasts, 0);
+
+            return weatherForecasts;
         }
 
-        public IEnumerator GetEnumerator()
+        public void UpdateValues(string oldValue, string newValue)
         {
-            int i = 0;
-            yield return i++;
+            WeatherForecast weatherForecastNew = new WeatherForecast(newValue);
+            WeatherForecast weatherForecastOld = new WeatherForecast(oldValue);
+
+            valuesHolder.TryUpdate(weatherForecastOld.Date.ToString(), weatherForecastNew, weatherForecastOld);
         }
+
+        public void DeleteValues(string valueToDelete)
+        {
+            WeatherForecast weatherForecastToDelete = new WeatherForecast(valueToDelete);
+            valuesHolder.TryRemove(weatherForecastToDelete.Date.ToString(), out weatherForecastToDelete);
+
+
+        }
+    }
+
 }
