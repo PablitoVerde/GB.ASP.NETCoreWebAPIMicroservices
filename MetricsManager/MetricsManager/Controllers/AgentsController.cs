@@ -9,6 +9,7 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class AgentsController : ControllerBase
     {
+        private readonly AgentInfoHolder _holder;
 
         /// <summary>
         /// Зарегистрировать агент метрик
@@ -18,6 +19,7 @@ namespace MetricsManager.Controllers
         [HttpPost("register")]
         public IActionResult RegisterAgent([FromBody] AgentInfo agentInfo)
         {
+            _holder.AddValue(agentInfo);
             return Ok();
         }
 
