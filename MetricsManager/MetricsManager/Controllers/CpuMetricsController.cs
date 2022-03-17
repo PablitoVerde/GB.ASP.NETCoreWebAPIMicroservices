@@ -29,6 +29,7 @@ namespace MetricsManager.Controllers
         [HttpGet("cluster/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAllCluster([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
+            _logger.LogInformation($"Запрос GET Кластер: {fromTime} {toTime}");
             return Ok();
         }
 

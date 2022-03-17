@@ -5,30 +5,31 @@ using System.Text;
 using Xunit;
 using MetricsAgent;
 using MetricsAgent.Controllers;
+using Moq;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgentTests
 {
     public class CpuMetricsControllerUnitTests
     {
         private CpuMetricsController controller;
+        private Mock<ICpuMetricsRepository> mock;
+        private Mock<ILogger<CpuMetricsController>> mock2;
         public CpuMetricsControllerUnitTests()
         {
-            controller = new CpuMetricsController();
+            mock = new Mock<ICpuMetricsRepository>();
+            controller = new CpuMetricsController(mock2.Object, mock.Object);
         }
 
         //Метод, выполняющий тест
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
         {
-            //Arrange - подготовка данных
-            var fromTime = TimeSpan.FromSeconds(0);
-            var toTime = TimeSpan.FromSeconds(100);
+            mock.Setup(repository => repository.Create(It.IsAny<CpuMetric>())).Verifiable();
 
-            //Act - выполнение действия
-            var result = controller.GetMetricsFromAgent(fromTime, toTime);
+            var result = controller.Create(new MetricsAgent.Requests.CpuMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
 
-            // Assert - проверка результата
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
+            mock.Verify(repository => repository.Create(It.IsAny<CpuMetric>()), Times.AtMostOnce());
         }
     }
 }

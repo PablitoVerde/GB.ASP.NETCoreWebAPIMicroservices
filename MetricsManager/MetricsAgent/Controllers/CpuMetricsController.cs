@@ -4,6 +4,7 @@ using System;
 using MetricsAgent.Requests;
 using MetricsAgent.Responses;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgent.Controllers
 {
@@ -12,14 +13,18 @@ namespace MetricsAgent.Controllers
     public class CpuMetricsController : ControllerBase
     {
         private ICpuMetricsRepository repository;
-        public CpuMetricsController(ICpuMetricsRepository repository)
+        private readonly ILogger<CpuMetricsController> _logger;
+        public CpuMetricsController(ILogger<CpuMetricsController> logger, ICpuMetricsRepository repository)
         {
+            _logger = logger;
+            _logger.LogDebug(1, "NLog подключен к CpuMetricsController");
             this.repository = repository;
         }
 
         [HttpPost("create")]
         public IActionResult Create([FromBody] CpuMetricCreateRequest request)
         {
+            _logger.LogInformation($"Запрос POST: {request.Time} {request.Value}");
             repository.Create(new CpuMetric
             {
                 Time = request.Time,
@@ -38,12 +43,14 @@ namespace MetricsAgent.Controllers
             };
             foreach (var metric in metrics)
             {
+                
                 response.Metrics.Add(new CpuMetricDto
                 {
                     Time = metric.Time,
                     Value = metric.Value,
                     Id = metric.Id
                 });
+                _logger.LogInformation($"Запрос GET ALL: {metric.Time} {metric.Value}");
             }
             return Ok(response);
         }
@@ -53,6 +60,7 @@ namespace MetricsAgent.Controllers
             [FromRoute] TimeSpan fromTime,
             [FromRoute] TimeSpan toTime)
         {
+            _logger.LogInformation($"Запрос GET: {fromTime} {toTime}");
             return Ok();
         }
     }
