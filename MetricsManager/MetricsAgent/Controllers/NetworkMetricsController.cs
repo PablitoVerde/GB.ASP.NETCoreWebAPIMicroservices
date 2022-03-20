@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using Microsoft.Extensions.Logging;
 using MetricsAgent.Repositories;
+using MetricsAgent.Requests;
 
 namespace MetricsAgent.Controllers
 {
@@ -25,6 +26,18 @@ namespace MetricsAgent.Controllers
                  [FromRoute] TimeSpan toTime)
         {
             _logger.LogInformation($"Запрос GET: {fromTime} {toTime}");
+            return Ok();
+        }
+
+        [HttpPost("create")]
+        public IActionResult Create([FromBody] NetworkMetricCreateRequest request)
+        {
+            _logger.LogInformation($"Запрос POST: {request.Time} {request.Value}");
+            repository.Create(new NetworkMetric
+            {
+                Time = request.Time,
+                Value = request.Value
+            });
             return Ok();
         }
     }

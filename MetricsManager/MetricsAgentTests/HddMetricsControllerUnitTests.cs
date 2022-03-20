@@ -6,30 +6,34 @@ using System.Text;
 using Xunit;
 using MetricsAgent;
 using MetricsAgent.Controllers;
+using Moq;
+using MetricsAgent.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgentTests
 {
     public class HddMetricsControllerUnitTests
     {
         private HddMetricsController controller;
+        private Mock<IHddMetricsRepository> mock;
+        private Mock<ILogger<HddMetricsController>> mock2;
         public HddMetricsControllerUnitTests()
         {
-            controller = new HddMetricsController();
+            mock = new Mock<IHddMetricsRepository>();
+            mock2 = new Mock<ILogger<HddMetricsController>>();
+            controller = new HddMetricsController(mock2.Object, mock.Object);
+            
         }
 
         //Метод, выполняющий тест
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
         {
-            //Arrange - подготовка данных
-            var fromTime = TimeSpan.FromSeconds(0);
-            var toTime = TimeSpan.FromSeconds(100);
+            mock.Setup(repository => repository.Create(It.IsAny<HddMetric>())).Verifiable();
 
-            //Act - выполнение действия
-            var result = controller.GetMetricsFromAgent(fromTime, toTime);
+            var result = controller.Create(new MetricsAgent.Requests.HddMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
 
-            // Assert - проверка результата
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
+            mock.Verify(repository => repository.Create(It.IsAny<HddMetric>()), Times.AtMostOnce());
         }
     }
 }

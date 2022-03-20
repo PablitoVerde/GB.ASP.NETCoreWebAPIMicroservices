@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using MetricsAgent.Requests;
 
 namespace MetricsAgent.Controllers
 {
@@ -26,6 +27,18 @@ namespace MetricsAgent.Controllers
             [FromRoute] TimeSpan toTime)
         {
             _logger.LogInformation($"Запрос GET: {fromTime} {toTime}");
+            return Ok();
+        }
+
+        [HttpPost("create")]
+        public IActionResult Create([FromBody] HddMetricCreateRequest request)
+        {
+            _logger.LogInformation($"Запрос POST: {request.Time} {request.Value}");
+            repository.Create(new HddMetric
+            {
+                Time = request.Time,
+                Value = request.Value
+            });
             return Ok();
         }
     }

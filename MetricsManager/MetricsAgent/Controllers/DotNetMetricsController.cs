@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using MetricsAgent.Requests;
 
 namespace MetricsAgent.Controllers
 {
@@ -11,8 +12,8 @@ namespace MetricsAgent.Controllers
     public class DotNetMetricsController : ControllerBase
     {
         private IDotNetMetricsRepository repository;
-        private readonly ILogger<CpuMetricsController> _logger;
-        public DotNetMetricsController(ILogger<CpuMetricsController> logger, IDotNetMetricsRepository repository)
+        private readonly ILogger<DotNetMetricsController> _logger;
+        public DotNetMetricsController(ILogger<DotNetMetricsController> logger, IDotNetMetricsRepository repository)
         {
             _logger = logger;
             _logger.LogDebug(1, "NLog подключен к DotNetMetricsController");
@@ -26,6 +27,18 @@ namespace MetricsAgent.Controllers
             [FromRoute] TimeSpan toTime)
         {
             _logger.LogInformation($"Запрос GET: {fromTime} {toTime}");
+            return Ok();
+        }
+
+        [HttpPost("create")]
+        public IActionResult Create([FromBody] DotNetMetricCreateRequest request)
+        {
+            _logger.LogInformation($"Запрос POST: {request.Time} {request.Value}");
+            repository.Create(new DotNetMetric
+            {
+                Time = request.Time,
+                Value = request.Value
+            });
             return Ok();
         }
     }
