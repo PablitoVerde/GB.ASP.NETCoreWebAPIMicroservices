@@ -18,6 +18,7 @@ namespace MetricsAgentTests
         public CpuMetricsControllerUnitTests()
         {
             mock = new Mock<ICpuMetricsRepository>();
+            mock2 = new Mock<ILogger<CpuMetricsController>>();
             controller = new CpuMetricsController(mock2.Object, mock.Object);
         }
 

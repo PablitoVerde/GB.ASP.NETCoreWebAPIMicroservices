@@ -1,34 +1,37 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using MetricsAgent.Controllers;
+using Moq;
+using MetricsAgent.Repositories;
+using Microsoft.Extensions.Logging;
+using MetricsAgent;
 
 namespace MetricsAgentTests
 {
     public class RamMetricsControllerUnitTests
     {
         private RamMetricsController controller;
+        private Mock<IRamMetricsRepository> mock;
+        private Mock<ILogger<RamMetricsController>> mock2;
         public RamMetricsControllerUnitTests()
         {
-            controller = new RamMetricsController();
+            mock = new Mock<IRamMetricsRepository>();
+            mock2 = new Mock<ILogger<RamMetricsController>>();
+            controller = new RamMetricsController(mock2.Object, mock.Object);
         }
 
         //Метод, выполняющий тест
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
         {
-            //Arrange - подготовка данных
-            var fromTime = TimeSpan.FromSeconds(0);
-            var toTime = TimeSpan.FromSeconds(100);
+            mock.Setup(repository => repository.Create(It.IsAny<RamMetric>())).Verifiable();
 
-            //Act - выполнение действия
-            var result = controller.GetMetricsFromAgent(fromTime, toTime);
+            var result = controller.Create(new MetricsAgent.Requests.RamMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
 
-            // Assert - проверка результата
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
+            mock.Verify(repository => repository.Create(It.IsAny<RamMetric>()), Times.AtMostOnce());
         }
     }
 }

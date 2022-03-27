@@ -6,31 +6,33 @@ using System.Text;
 using Xunit;
 using MetricsAgent;
 using MetricsAgent.Controllers;
+using Moq;
+using MetricsAgent.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgentTests
 {
     public class DotNetMetricsControllerUnitTests
     {
         private DotNetMetricsController controller;
+        private Mock<IDotNetMetricsRepository> mock;
+        private Mock<ILogger<DotNetMetricsController>> mock2;
         public DotNetMetricsControllerUnitTests()
         {
-            controller = new DotNetMetricsController();
+            mock = new Mock<IDotNetMetricsRepository>();
+            mock2 = new Mock<ILogger<DotNetMetricsController>>();
+            controller = new DotNetMetricsController(mock2.Object, mock.Object);
         }
-        
+
         //Метод, выполняющий тест
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
         {
-            //Arrange - подготовка данных
-            var fromTime = TimeSpan.FromSeconds(0);
-            var toTime = TimeSpan.FromSeconds(100);
-            
-            //Act - выполнение действия
-            var result = controller.GetMetricsFromAgent(fromTime,
-            toTime);
-            
-            // Assert - проверка результата
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
+            mock.Setup(repository => repository.Create(It.IsAny<DotNetMetric>())).Verifiable();
+
+            var result = controller.Create(new MetricsAgent.Requests.DotNetMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
+
+            mock.Verify(repository => repository.Create(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
         }
     }
 }
