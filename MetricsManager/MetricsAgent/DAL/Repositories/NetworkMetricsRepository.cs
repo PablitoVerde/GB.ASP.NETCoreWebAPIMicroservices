@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using Core;
+using MetricsAgent.DAL.Interfaces;
 
 namespace MetricsAgent.Repositories
 {
-    public interface INetworkMetricsRepository : IRepository<NetworkMetric>
-    {
-
-    }
     public class NetworkMetricsRepository : INetworkMetricsRepository
     {
         private const string ConnectionString = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100;";
