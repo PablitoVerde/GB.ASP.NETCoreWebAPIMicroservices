@@ -5,6 +5,11 @@ using Microsoft.Extensions.Logging;
 using MetricsAgent.Repositories;
 using MetricsAgent;
 using MetricsAgent.Requests;
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
+using MetricsAgent.DAL.Models;
+using MetricsAgent.Responses;
+using System.Collections.Generic;
 
 namespace MetricsAgent.Controllers
 {
@@ -14,11 +19,13 @@ namespace MetricsAgent.Controllers
     {
         private IRamMetricsRepository repository;
         private readonly ILogger<RamMetricsController> _logger;
-        public RamMetricsController(ILogger<RamMetricsController> logger, IRamMetricsRepository repository)
+        private readonly IMapper mapper;
+        public RamMetricsController(ILogger<RamMetricsController> logger, IRamMetricsRepository repository, IMapper mapper)
         {
             _logger = logger;
             _logger.LogDebug(1, "NLog подключен к RamMetricsController");
             this.repository = repository;
+            this.mapper = mapper;
         }
 
 
@@ -41,6 +48,21 @@ namespace MetricsAgent.Controllers
                 Value = request.Value
             });
             return Ok();
+        }
+
+        [HttpGet("all")]
+        public IActionResult GetAll()
+        {
+            IList<RamMetric> metrics = repository.GetAll();
+            var response = new AllRamMetricsResponse()
+            {
+                Metrics = new List<RamMetricDto>()
+            };
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(mapper.Map<RamMetricDto>(metric));
+            }
+            return Ok(response);
         }
     }
 }

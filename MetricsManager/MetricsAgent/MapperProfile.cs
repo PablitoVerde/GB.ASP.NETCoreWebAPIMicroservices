@@ -9,6 +9,10 @@ namespace MetricsAgent
         public MapperProfile()
         {
             CreateMap<CpuMetric, CpuMetricDto>();
+            CreateMap<DotNetMetric, DotNetMetricDto>();
+            CreateMap<HddMetric, HddMetricDto>();
+            CreateMap<NetworkMetric, NetworkMetricDto>();
+            CreateMap<RamMetric, RamMetricDto>();
         }
     }
 }

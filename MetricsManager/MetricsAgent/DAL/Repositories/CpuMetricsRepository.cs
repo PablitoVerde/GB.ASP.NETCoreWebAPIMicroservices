@@ -38,7 +38,7 @@ namespace MetricsAgent
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                connection.Execute(@"DELETE FROM cpumetrics WHERE id=@id",
+                connection.Execute("DELETE FROM cpumetrics WHERE id=@id",
                     new
                     {
                         id = id

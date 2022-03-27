@@ -4,6 +4,11 @@ using System;
 using Microsoft.Extensions.Logging;
 using MetricsAgent.Repositories;
 using MetricsAgent.Requests;
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
+using MetricsAgent.DAL.Models;
+using MetricsAgent.Responses;
+using System.Collections.Generic;
 
 namespace MetricsAgent.Controllers
 {
@@ -13,11 +18,13 @@ namespace MetricsAgent.Controllers
     {
         private INetworkMetricsRepository repository;
         private readonly ILogger<NetworkMetricsController> _logger;
-        public NetworkMetricsController(ILogger<NetworkMetricsController> logger, INetworkMetricsRepository repository)
+        private readonly IMapper mapper;
+        public NetworkMetricsController(ILogger<NetworkMetricsController> logger, INetworkMetricsRepository repository, IMapper mapper)
         {
             _logger = logger;
             _logger.LogDebug(1, "NLog подключен к NetworkMetricsController");
             this.repository = repository;
+            this.mapper = mapper;
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}")]
@@ -39,6 +46,21 @@ namespace MetricsAgent.Controllers
                 Value = request.Value
             });
             return Ok();
+        }
+
+        [HttpGet("all")]
+        public IActionResult GetAll()
+        {
+            IList<NetworkMetric> metrics = repository.GetAll();
+            var response = new AllNetworkMetricsResponse()
+            {
+                Metrics = new List<NetworkMetricDto>()
+            };
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(mapper.Map<NetworkMetricDto>(metric));
+            }
+            return Ok(response);
         }
     }
 }

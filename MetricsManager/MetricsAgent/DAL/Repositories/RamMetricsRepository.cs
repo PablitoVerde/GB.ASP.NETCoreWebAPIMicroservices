@@ -2,102 +2,77 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using MetricsAgent.DAL.Interfaces;
+using Dapper;
+using MetricsAgent.DAL.Models;
+using System.Linq;
 
 namespace MetricsAgent.Repositories
 {
     public class RamMetricsRepository : IRamMetricsRepository
     {
-        private const string ConnectionString = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100;";
+        private const string ConnectionString = @"Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100;";
 
+
+        public RamMetricsRepository()
+        {
+            SqlMapper.AddTypeHandler(new TimeSpanHandler());
+        }
+
+        // Инжектируем соединение с базой данных в наш репозиторий через конструктор
         public void Create(RamMetric item)
         {
-            using var connection = new SQLiteConnection(ConnectionString);
-            connection.Open();
-
-            using var cmd = new SQLiteCommand(connection);
-
-            cmd.CommandText = "INSERT INTO rammetrics (value, time) VALUES(@value, @time)";
-            cmd.Parameters.AddWithValue("@value", item.Value);
-            cmd.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                connection.Execute("INSERT INTO rammetrics(value, time) VALUES(@value, @time)",
+                    new
+                    {
+                        value = item.Value,
+                        time = item.Time.TotalSeconds
+                    });
+            }
         }
 
         public void Delete(int id)
         {
-            using var connection = new SQLiteConnection(ConnectionString);
-            connection.Open();
-            using var cmd = new SQLiteCommand(connection);
-
-            cmd.CommandText = "DELETE FROM rammetrics WHERE id=@id";
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
-        }
-
-        public IList<RamMetric> GetAll()
-        {
-            using var connection = new SQLiteConnection(ConnectionString);
-            connection.Open();
-            using var cmd = new SQLiteCommand(connection);
-
-            cmd.CommandText = "SELECT * FROM rammetrics";
-            var returnList = new List<RamMetric>();
-            using (SQLiteDataReader reader = cmd.ExecuteReader())
+            using (var connection = new SQLiteConnection(ConnectionString))
             {
-
-                while (reader.Read())
-                {
-
-                    returnList.Add(new RamMetric
+                connection.Execute("DELETE FROM rammetrics WHERE id=@id",
+                    new
                     {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
+                        id = id
                     });
-                }
-            }
-            return returnList;
-        }
-
-        public RamMetric GetById(int id)
-        {
-            using var connection = new SQLiteConnection(ConnectionString);
-            connection.Open();
-            using var cmd = new SQLiteCommand(connection);
-            cmd.CommandText = "SELECT * FROM rammetrics WHERE id=@id";
-            using (SQLiteDataReader reader = cmd.ExecuteReader())
-            {
-                // Если удалось что-то прочитать
-                if (reader.Read())
-                {
-                    // возвращаем прочитанное
-                    return new RamMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(1))
-                    };
-                }
-                else
-                {
-                    // Не нашлась запись по идентификатору, не делаем ничего
-                    return null;
-                }
             }
         }
 
         public void Update(RamMetric item)
         {
-            using var connection = new SQLiteConnection(ConnectionString);
-            using var cmd = new SQLiteCommand(connection);
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                connection.Execute("UPDATE rammetrics SET value = @value, time = @time WHERE id = @id",
+                    new
+                    {
+                        value = item.Value,
+                        time = item.Time.TotalSeconds,
+                        id = item.Id
+                    });
+            }
+        }
 
-            cmd.CommandText = "UPDATE rammetrics SET value = @value, time = @time WHERE id = @id; ";
-            cmd.Parameters.AddWithValue("@id", item.Id);
-            cmd.Parameters.AddWithValue("@value", item.Value);
-            cmd.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
+        public IList<RamMetric> GetAll()
+        {
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                return connection.Query<RamMetric>("SELECT Id, Time, Value FROM rammetrics").ToList();
+            }
+        }
+
+        public RamMetric GetById(int id)
+        {
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                return connection.QuerySingle<RamMetric>("SELECT Id, Time, Value FROM rammetrics WHERE id=@id",
+                    new { id = id });
+            }
         }
     }
 }
