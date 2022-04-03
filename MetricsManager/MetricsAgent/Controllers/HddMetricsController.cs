@@ -4,6 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using MetricsAgent.Requests;
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
+using MetricsAgent.DAL.Models;
+using MetricsAgent.Responses;
+using System.Collections.Generic;
 
 namespace MetricsAgent.Controllers
 {
@@ -13,11 +18,13 @@ namespace MetricsAgent.Controllers
     {
         private IHddMetricsRepository repository;
         private readonly ILogger<HddMetricsController> _logger;
-        public HddMetricsController(ILogger<HddMetricsController> logger, IHddMetricsRepository repository)
+        private readonly IMapper mapper;
+        public HddMetricsController(ILogger<HddMetricsController> logger, IHddMetricsRepository repository, IMapper mapper)
         {
             _logger = logger;
             _logger.LogDebug(1, "NLog подключен к HddMetricsController");
             this.repository = repository;
+            this.mapper = mapper;
         }
 
 
@@ -40,6 +47,21 @@ namespace MetricsAgent.Controllers
                 Value = request.Value
             });
             return Ok();
+        }
+
+        [HttpGet("all")]
+        public IActionResult GetAll()
+        {
+            IList<HddMetric> metrics = repository.GetAll();
+            var response = new AllHddMetricsResponse()
+            {
+                Metrics = new List<HddMetricDto>()
+            };
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(mapper.Map<HddMetricDto>(metric));
+            }
+            return Ok(response);
         }
     }
 }

@@ -3,13 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetricsManager", "MetricsManager\MetricsManager.csproj", "{11D174DD-90CB-4010-A464-D199F6746166}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetricsManager", "MetricsManager\MetricsManager.csproj", "{11D174DD-90CB-4010-A464-D199F6746166}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4838A8B0-CE91-4253-AF11-60D17EB363DF} = {4838A8B0-CE91-4253-AF11-60D17EB363DF}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetricsManagerTests", "MetricsManagerTests\MetricsManagerTests.csproj", "{14A809EE-9C98-4362-B351-62E2B12E2892}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetricsManagerTests", "MetricsManagerTests\MetricsManagerTests.csproj", "{14A809EE-9C98-4362-B351-62E2B12E2892}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetricsAgent", "MetricsAgent\MetricsAgent.csproj", "{024EF276-814E-4B0A-A15A-00FB43F42FB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetricsAgent", "MetricsAgent\MetricsAgent.csproj", "{024EF276-814E-4B0A-A15A-00FB43F42FB3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4838A8B0-CE91-4253-AF11-60D17EB363DF} = {4838A8B0-CE91-4253-AF11-60D17EB363DF}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetricsAgentTests", "MetricsAgentTests\MetricsAgentTests.csproj", "{01F10607-0BA9-44E9-9CB4-77022DA7FD2F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetricsAgentTests", "MetricsAgentTests\MetricsAgentTests.csproj", "{01F10607-0BA9-44E9-9CB4-77022DA7FD2F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{4838A8B0-CE91-4253-AF11-60D17EB363DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +41,10 @@ Global
 		{01F10607-0BA9-44E9-9CB4-77022DA7FD2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01F10607-0BA9-44E9-9CB4-77022DA7FD2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01F10607-0BA9-44E9-9CB4-77022DA7FD2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4838A8B0-CE91-4253-AF11-60D17EB363DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4838A8B0-CE91-4253-AF11-60D17EB363DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4838A8B0-CE91-4253-AF11-60D17EB363DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4838A8B0-CE91-4253-AF11-60D17EB363DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

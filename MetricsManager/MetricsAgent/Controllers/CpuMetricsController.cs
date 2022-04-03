@@ -5,6 +5,8 @@ using MetricsAgent.Requests;
 using MetricsAgent.Responses;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using AutoMapper;
+using MetricsAgent.DAL.Interfaces;
 
 namespace MetricsAgent.Controllers
 {
@@ -14,11 +16,13 @@ namespace MetricsAgent.Controllers
     {
         private ICpuMetricsRepository repository;
         private readonly ILogger<CpuMetricsController> _logger;
-        public CpuMetricsController(ILogger<CpuMetricsController> logger, ICpuMetricsRepository repository)
+        private readonly IMapper mapper;
+        public CpuMetricsController(ILogger<CpuMetricsController> logger, ICpuMetricsRepository repository, IMapper mapper)
         {
             _logger = logger;
             _logger.LogDebug(1, "NLog подключен к CpuMetricsController");
             this.repository = repository;
+            this.mapper = mapper;
         }
 
         [HttpPost("create")]
@@ -36,21 +40,14 @@ namespace MetricsAgent.Controllers
         [HttpGet("all")]
         public IActionResult GetAll()
         {
-            var metrics = repository.GetAll();
+            IList<CpuMetric> metrics = repository.GetAll();
             var response = new AllCpuMetricsResponse()
             {
                 Metrics = new List<CpuMetricDto>()
             };
             foreach (var metric in metrics)
             {
-                
-                response.Metrics.Add(new CpuMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
-                _logger.LogInformation($"Запрос GET ALL: {metric.Time} {metric.Value}");
+                response.Metrics.Add(mapper.Map<CpuMetricDto>(metric));
             }
             return Ok(response);
         }
