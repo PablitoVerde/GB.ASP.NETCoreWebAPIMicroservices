@@ -58,6 +58,10 @@ namespace MetricsAgent.Controllers
             [FromRoute] TimeSpan toTime)
         {
             _logger.LogInformation($"Запрос GET: {fromTime} {toTime}");
+
+
+
+
             return Ok();
         }
     }
